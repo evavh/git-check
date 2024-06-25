@@ -11,6 +11,7 @@ struct Args {
 #[derive(Debug)]
 enum Status {
     UncommittedChanges,
+    DivergedFromRemote,
     UnpushedChanges,
     UntrackedFiles,
     Clean,
@@ -25,6 +26,8 @@ impl FromStr for Status {
             || str.contains("Changes to be committed")
         {
             Self::UncommittedChanges
+        } else if str.contains("have diverged") {
+            Self::DivergedFromRemote
         } else if str.contains("is ahead of") {
             Self::UnpushedChanges
         } else if str.contains("Untracked files") {
