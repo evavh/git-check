@@ -25,7 +25,7 @@ impl FromStr for Status {
             || str.contains("Changes to be committed")
         {
             Self::UncommittedChanges
-        } else if str.contains("ahead of") {
+        } else if str.contains("is ahead of") {
             Self::UnpushedChanges
         } else if str.contains("Untracked files") {
             Self::UntrackedFiles
@@ -87,13 +87,13 @@ impl Repo {
     fn new(path: &PathBuf) -> Self {
         let name = path.file_name().unwrap().to_string_lossy().to_string();
 
-        let status_output = git_command("status", &path);
+        let status_output = git_command("status", path);
         let status = std::str::from_utf8(&status_output.stdout).unwrap();
         let status = Status::from_str(status).unwrap();
         let error = std::str::from_utf8(&status_output.stderr).unwrap();
         let error = Error::from_str(error).unwrap();
 
-        let remote_output = git_command("remote", &path);
+        let remote_output = git_command("remote", path);
         let remote = std::str::from_utf8(&remote_output.stdout).unwrap();
         let remote = Remote::from_str(remote).unwrap();
 
@@ -109,7 +109,7 @@ impl Repo {
 fn main() {
     let Args { path } = Args::parse();
 
-    for entry in fs::read_dir(&path).unwrap() {
+    for entry in fs::read_dir(path).unwrap() {
         let entry = entry.unwrap();
         if entry.file_type().unwrap().is_dir() {
             let path = entry.path();
