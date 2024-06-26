@@ -1,4 +1,7 @@
-use std::{fs, path::PathBuf};
+use std::{
+    fs::{self, DirEntry},
+    path::PathBuf,
+};
 
 use clap::Parser;
 
@@ -15,12 +18,12 @@ struct Args {
 fn main() {
     let Args { path } = Args::parse();
 
-    for entry in fs::read_dir(path).unwrap() {
-        let entry = entry.unwrap();
-        if entry.file_type().unwrap().is_dir() {
-            let path = entry.path();
-            let repo = RepoState::new(&path);
-            dbg!(repo);
-        }
-    }
+    let repos = fs::read_dir(path)
+        .unwrap()
+        .map(Result::unwrap)
+        .filter(|entry| entry.file_type().unwrap().is_dir())
+        .map(|entry| entry.path())
+        .map(|path| RepoState::new(&path));
+
+    dbg!(repos.collect::<Vec<_>>());
 }
