@@ -1,7 +1,4 @@
-use std::{
-    fs::{self, DirEntry},
-    path::PathBuf,
-};
+use std::{fs, path::PathBuf};
 
 use clap::Parser;
 

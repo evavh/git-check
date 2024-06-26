@@ -7,6 +7,10 @@ use std::str::FromStr;
 
 #[derive(Debug)]
 pub(crate) enum Status {
+    NoRepo,
+    Error(String),
+    NoRemote,
+    DetachedHead,
     UncommittedChanges,
     DivergedFromRemote,
     UnpushedChanges,
@@ -19,7 +23,9 @@ impl FromStr for Status {
     type Err = ();
 
     fn from_str(str: &str) -> Result<Self, Self::Err> {
-        let var = if str.contains("not staged for commit")
+        let var = if str.contains("HEAD detached") {
+            Self::DetachedHead
+        } else if str.contains("not staged for commit")
             || str.contains("Changes to be committed")
         {
             Self::UncommittedChanges
@@ -56,31 +62,9 @@ impl FromStr for Remote {
 }
 
 #[derive(Debug)]
-pub(crate) enum Error {
-    NoRepo,
-    Other(String),
-}
-
-impl FromStr for Error {
-    type Err = ();
-
-    fn from_str(str: &str) -> Result<Self, Self::Err> {
-        let var = if str.contains("not a git repository") {
-            Self::NoRepo
-        } else {
-            Self::Other(str.to_string())
-        };
-
-        Ok(var)
-    }
-}
-
-#[derive(Debug)]
 pub(crate) struct RepoState {
     pub(crate) name: String,
     pub(crate) status: Status,
-    pub(crate) remote: Remote,
-    pub(crate) error: Error,
 }
 
 impl RepoState {
@@ -89,20 +73,26 @@ impl RepoState {
 
         let status_output = git_command("status", path);
         let status = std::str::from_utf8(&status_output.stdout).unwrap();
-        let status = Status::from_str(status).unwrap();
         let error = std::str::from_utf8(&status_output.stderr).unwrap();
-        let error = Error::from_str(error).unwrap();
 
         let remote_output = git_command("remote", path);
         let remote = std::str::from_utf8(&remote_output.stdout).unwrap();
-        let remote = Remote::from_str(remote).unwrap();
 
-        Self {
-            name,
-            status,
-            remote,
-            error,
-        }
+        let status = if error.is_empty() {
+            if remote.is_empty() {
+                Status::NoRemote
+            } else {
+                Status::from_str(status).unwrap()
+            }
+        } else {
+            if error.contains("not a git repository") {
+                Status::NoRepo
+            } else {
+                Status::Error(error.to_string())
+            }
+        };
+
+        Self { name, status }
     }
 }
 
