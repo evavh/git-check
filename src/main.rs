@@ -38,9 +38,9 @@ fn main() {
                 println!("\nClean: {} repos", repos.len());
             } else {
                 println!("\n{status_variant}:");
-                repos
-                    .into_iter()
-                    .for_each(|r| println!(" - {}", r.name_and_content()));
+                for repo in repos {
+                    println!(" - {}", repo.name_and_content());
+                }
             }
         }
     }

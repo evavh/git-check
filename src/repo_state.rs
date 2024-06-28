@@ -1,4 +1,3 @@
-use std;
 use std::process::Command;
 
 use std::path::PathBuf;
@@ -80,6 +79,7 @@ impl FromStr for Status {
 }
 
 impl Status {
+    #[allow(clippy::match_same_arms)]
     pub fn is_same_variant(&self, other: &Self) -> bool {
         use Status as S;
         match (self, other) {
@@ -115,12 +115,10 @@ impl RepoState {
             } else {
                 Status::from_str(status).unwrap()
             }
+        } else if error.contains("not a git repository") {
+            Status::NoRepo
         } else {
-            if error.contains("not a git repository") {
-                Status::NoRepo
-            } else {
-                Status::Error(error.to_string())
-            }
+            Status::Error(error.to_string())
         };
 
         Self { name, status }
