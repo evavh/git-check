@@ -3,9 +3,11 @@ use std::{fs, path::PathBuf};
 use clap::Parser;
 use strum::IntoEnumIterator;
 
-use crate::repo_state::{RepoState, Status};
+use crate::repo::Repo;
+use crate::status::Status;
 
-mod repo_state;
+mod repo;
+mod status;
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -23,7 +25,7 @@ fn main() {
         .map(Result::unwrap)
         .filter(|entry| entry.file_type().unwrap().is_dir())
         .map(|entry| entry.path())
-        .map(|path| RepoState::new(&path))
+        .map(|path| Repo::new(&path))
         .collect();
 
     for status_variant in Status::iter() {
