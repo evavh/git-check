@@ -1,8 +1,9 @@
 use std::{fs, path::PathBuf};
 
 use clap::Parser;
+use strum::IntoEnumIterator;
 
-use crate::repo_state::RepoState;
+use crate::repo_state::{RepoState, Status};
 
 mod repo_state;
 
@@ -10,17 +11,37 @@ mod repo_state;
 struct Args {
     #[arg(short, long)]
     path: PathBuf,
+    #[arg(short, long)]
+    show_clean: bool,
 }
 
 fn main() {
-    let Args { path } = Args::parse();
+    let Args { path, show_clean } = Args::parse();
 
-    let repos = fs::read_dir(path)
+    let repos: Vec<_> = fs::read_dir(path)
         .unwrap()
         .map(Result::unwrap)
         .filter(|entry| entry.file_type().unwrap().is_dir())
         .map(|entry| entry.path())
-        .map(|path| RepoState::new(&path));
+        .map(|path| RepoState::new(&path))
+        .collect();
 
-    dbg!(repos.collect::<Vec<_>>());
+    for status_variant in Status::iter() {
+        let repos: Vec<_> = repos
+            .clone()
+            .into_iter()
+            .filter(|r| r.status.is_same_variant(&status_variant))
+            .collect();
+
+        if !repos.is_empty() {
+            if status_variant == Status::Clean && !show_clean {
+                println!("\nClean: {} repos", repos.len());
+            } else {
+                println!("\n{status_variant}:");
+                repos
+                    .into_iter()
+                    .for_each(|r| println!(" - {}", r.name_and_content()));
+            }
+        }
+    }
 }
