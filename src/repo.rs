@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::Path;
 use std::process::Command;
 use std::str::FromStr;
 
@@ -11,7 +11,7 @@ pub struct Repo {
 }
 
 impl Repo {
-    pub fn new(path: &PathBuf) -> Self {
+    pub fn new(path: &Path) -> Self {
         let name = path.file_name().unwrap().to_string_lossy().to_string();
 
         let status_output = git_command("status", path);
@@ -46,7 +46,7 @@ impl Repo {
     }
 }
 
-fn git_command(command: &str, path: &PathBuf) -> std::process::Output {
+fn git_command(command: &str, path: &Path) -> std::process::Output {
     let output = Command::new("git")
         .arg(command)
         .current_dir(path)
