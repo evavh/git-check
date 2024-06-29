@@ -12,11 +12,16 @@ mod status;
 
 const IGNORE_FILENAME: &str = "git_check_ignore";
 
+/// Utility to check the status of git repos within a directory
 #[derive(Parser, Debug)]
+#[command(version)]
 struct Args {
-    #[arg(short, long)]
+    /// Parent directory to check for git repos (default current dir)
+    #[arg(default_value=std::env::current_dir().unwrap().into_os_string())]
+    #[arg(hide_default_value=true)]
     path: PathBuf,
-    #[arg(short, long)]
+    /// Show the names of clean repos (instead of a count)
+    #[arg(short = 'c', long)]
     show_clean: bool,
 }
 
