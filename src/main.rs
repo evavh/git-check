@@ -1,3 +1,8 @@
+#![warn(missing_docs)]
+//! A utility to check the status of all git repos within a directory.
+//! It checks for common states a git repo can be in, including whether it is up to
+//! date with a remote, and groups the subdirectories by status.
+
 use std::path::Path;
 use std::{fs, path::PathBuf};
 
@@ -7,14 +12,14 @@ use strum::IntoEnumIterator;
 use crate::repo::Repo;
 use crate::status::Status;
 
-mod repo;
-mod status;
+pub mod repo;
+pub mod status;
 
 const IGNORE_FILENAME: &str = "git_check_ignore";
 
 #[derive(Parser, Debug)]
 #[command(
-    about = "Utility to check the status of all git repos within a directory"
+    about = "A utility to check the status of all git repos within a directory"
 )]
 #[command(version)]
 struct Args {
@@ -25,6 +30,7 @@ struct Args {
     /// Show the names of clean repos (instead of a count)
     #[arg(short = 'c', long)]
     show_clean: bool,
+    #[allow(clippy::doc_markdown)]
     /// File in the parent directory that contains subdirectory
     /// names to ignore
     /// The hidden file (.FILENAME) will be checked if it doesn't
@@ -33,7 +39,7 @@ struct Args {
     #[arg(short, long)]
     #[arg(default_value=IGNORE_FILENAME)]
     #[arg(hide_default_value = true)]
-    #[arg(value_name="FILENAME")]
+    #[arg(value_name = "FILENAME")]
     #[clap(verbatim_doc_comment)]
     ignore_file: String,
 }

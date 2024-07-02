@@ -1,18 +1,32 @@
+//! Contains the Status enum, which defines common possible states
+
 use std::str::FromStr;
 
 use strum::EnumIter;
 
 #[derive(Debug, EnumIter, PartialEq, Eq, Clone)]
+/// Defines common states for a git repo to be in, including errors and unknown
+/// status messages
 pub enum Status {
+    /// Not a git repository
     NoRepo,
+    /// Some error
     Error(String),
+    /// No remote set
     NoRemote,
+    /// Repo is in detached head mode
     DetachedHead,
+    /// There are uncommitted changes
     UncommittedChanges,
+    /// The local repo has diverged from the remote
     DivergedFromRemote,
+    /// There are unpushed changes
     UnpushedChanges,
+    /// There are untracked files
     UntrackedFiles,
+    /// The repo is clean and up to date
     Clean,
+    /// Some other, as of yet unknown, status
     Unknown(String),
 }
 
@@ -76,6 +90,7 @@ impl FromStr for Status {
 
 impl Status {
     #[allow(clippy::match_same_arms)]
+    /// Compare the enum variant, but not what's inside
     pub fn is_same_variant(&self, other: &Self) -> bool {
         use Status as S;
         match (self, other) {
