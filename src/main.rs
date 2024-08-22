@@ -69,12 +69,25 @@ fn main() {
             .collect();
 
         if !repos.is_empty() {
-            if status_variant == Status::Clean && !show_clean {
-                println!("\nClean: {} repos", repos.len());
-            } else {
-                println!("\n{status_variant}:");
-                for repo in repos {
-                    println!(" - {}", repo.name_and_content());
+            match status_variant {
+                Status::Clean if !show_clean => {
+                    println!("\nClean: {} repos", repos.len())
+                }
+                s @ Status::NoRepo => {
+                    println!("\n{s}:");
+                    for repo in repos {
+                        println!(
+                            " - {}\n      {}",
+                            repo.name_and_content(),
+                            repo.file_sizes()
+                        )
+                    }
+                }
+                other => {
+                    println!("\n{other}:");
+                    for repo in repos {
+                        println!(" - {}", repo.name_and_content());
+                    }
                 }
             }
         }
